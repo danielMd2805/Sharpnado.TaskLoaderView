@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+
 using Xamarin.Forms;
 
 namespace Sharpnado.Presentation.Forms.Behaviors
@@ -32,14 +33,14 @@ namespace Sharpnado.Presentation.Forms.Behaviors
             bindable.PropertyChanged -= ViewPropertyChanged;
         }
 
-        private async void ViewPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void ViewPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             var view = (View)sender;
             if (e.PropertyName == nameof(View.IsVisible))
             {
                 if (!_lastVisibility && view.IsVisible)
                 {
-                    await Task.Delay(TimeSpan.FromSeconds(VisibilityInSeconds));
+                    Task.Delay(TimeSpan.FromSeconds(VisibilityInSeconds)).ConfigureAwait(false).GetAwaiter();
                     Device.BeginInvokeOnMainThread(() => view.IsVisible = false);
                 }
                 else
