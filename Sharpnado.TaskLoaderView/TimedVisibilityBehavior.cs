@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 using Xamarin.Forms;
 
@@ -26,12 +27,27 @@ namespace Sharpnado.Presentation.Forms
             bindable.PropertyChanged += ViewPropertyChanged;
         }
 
+        protected override void OnDetachingFrom(View bindable)
+        {
+            base.OnDetachingFrom(bindable);
+
+            bindable.PropertyChanged -= ViewPropertyChanged;
+        }
+
         private async void ViewPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             var view = (View)sender;
             if (e.PropertyName != nameof(view.IsVisible))
             {
-                return;
+                if (!_lastVisibility && view.IsVisible)
+                {
+                    await Task.Delay(VisibilityInMilliseconds);
+                    Device.BeginInvokeOnMainThread(() => view.IsVisible = false);
+                }
+                else
+                {
+                    _lastVisibility = view.IsVisible;
+                }
             }
 
             if (!_lastVisibility && view.IsVisible)
