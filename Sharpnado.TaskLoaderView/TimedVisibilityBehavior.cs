@@ -34,14 +34,14 @@ namespace Sharpnado.Presentation.Forms
             bindable.PropertyChanged -= ViewPropertyChanged;
         }
 
-        private void ViewPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private async void ViewPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             var view = (View)sender;
             if (e.PropertyName != nameof(view.IsVisible))
             {
                 if (!_lastVisibility && view.IsVisible)
                 {
-                    Task.Delay(TimeSpan.FromSeconds(VisibilityInSeconds)).ConfigureAwait(false).GetAwaiter();
+                    await Task.Delay(VisibilityInMilliseconds);
                     Device.BeginInvokeOnMainThread(() => view.IsVisible = false);
                 }
                 else
