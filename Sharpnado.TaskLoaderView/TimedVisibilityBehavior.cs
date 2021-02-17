@@ -3,21 +3,22 @@ using System.Threading.Tasks;
 
 using Xamarin.Forms;
 
-namespace Sharpnado.Presentation.Forms.Behaviors
+namespace Sharpnado.Presentation.Forms
 {
     public class TimedVisibilityBehavior : Behavior<View>
     {
+        public static readonly BindableProperty VisibilityInMillisecondsProperty = BindableProperty.Create(
+            nameof(VisibilityInMilliseconds),
+            typeof(int),
+            typeof(TimedVisibilityBehavior),
+            5000);
+
         private bool _lastVisibility;
 
-        public TimedVisibilityBehavior()
+        public int VisibilityInMilliseconds
         {
-            VisibilityInSeconds = 5;
-        }
-
-        public int VisibilityInSeconds
-        {
-            get;
-            set;
+            get => (int)GetValue(VisibilityInMillisecondsProperty);
+            set => SetValue(VisibilityInMillisecondsProperty, value);
         }
 
         protected override void OnAttachedTo(View bindable)
@@ -33,20 +34,30 @@ namespace Sharpnado.Presentation.Forms.Behaviors
             bindable.PropertyChanged -= ViewPropertyChanged;
         }
 
-        private void ViewPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private async void ViewPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             var view = (View)sender;
-            if (e.PropertyName == nameof(View.IsVisible))
+            if (e.PropertyName != nameof(view.IsVisible))
             {
                 if (!_lastVisibility && view.IsVisible)
                 {
-                    Task.Delay(TimeSpan.FromSeconds(VisibilityInSeconds)).ConfigureAwait(false).GetAwaiter();
+                    await Task.Delay(VisibilityInMilliseconds);
                     Device.BeginInvokeOnMainThread(() => view.IsVisible = false);
                 }
                 else
                 {
                     _lastVisibility = view.IsVisible;
                 }
+            }
+
+            if (!_lastVisibility && view.IsVisible)
+            {
+                await Task.Delay(VisibilityInMilliseconds);
+                view.IsVisible = false;
+            }
+            else
+            {
+                _lastVisibility = view.IsVisible;
             }
         }
     }
